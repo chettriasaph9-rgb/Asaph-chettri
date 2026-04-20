@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FrameCollab — Edit Together. Create Faster.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --brand: #5e4074;
+    --brand-light: #7a5494;
+    --brand-lighter: #9b6ab5;
+    --brand-dark: #3e2a50;
+    --brand-darker: #261838;
+    --brand-bg: #f5f0fa;
+    --brand-bg2: #ede4f5;
+    --white: #ffffff;
+    --text: #1a0f2e;
+    --text-muted: #6b5f7a;
+    --accent: #c9a8f0;
+    --glow: rgba(94,64,116,0.25);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .logo-text {
+    font-family: 'Syne', sans-serif;
+  }
+
+  /* ---- NAVBAR ---- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(38,24,56,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(201,168,240,0.1);
+    padding: 0 40px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    animation: slideDown 0.6s ease both;
+  }
+  @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--brand);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 16px rgba(94,64,116,0.6);
+    transition: box-shadow 0.3s;
+  }
+  .logo:hover .logo-icon { box-shadow: 0 0 24px rgba(201,168,240,0.5); }
+  .logo-text { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    color: rgba(255,255,255,0.6); font-size: 14px; font-weight: 400;
+    text-decoration: none; transition: color 0.2s; letter-spacing: 0.01em;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .btn-ghost {
+    background: transparent; border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.8); padding: 8px 18px; border-radius: 6px;
+    font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-nav {
+    background: var(--brand); border: none;
+    color: #fff; padding: 9px 20px; border-radius: 6px;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px rgba(94,64,116,0.4);
+  }
+  .btn-nav:hover { background: var(--brand-light); box-shadow: 0 0 28px rgba(94,64,116,0.6); }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    background: var(--brand-darker);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 40px 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg-orb {
+    position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none;
+  }
+  .orb1 { width: 600px; height: 600px; background: rgba(94,64,116,0.35); top: -100px; left: -150px; }
+  .orb2 { width: 400px; height: 400px; background: rgba(201,168,240,0.12); bottom: 0; right: -100px; }
+  .orb3 { width: 300px; height: 300px; background: rgba(94,64,116,0.2); bottom: 100px; left: 50%; transform: translateX(-50%); }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(201,168,240,0.1); border: 1px solid rgba(201,168,240,0.25);
+    border-radius: 20px; padding: 6px 16px; margin-bottom: 32px;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: #4cde90; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  .hero-badge span { color: rgba(255,255,255,0.7); font-size: 13px; }
+
+  .hero h1 {
+    font-size: clamp(42px, 7vw, 76px);
+    font-weight: 800; color: #fff;
+    line-height: 1.05; letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .hero h1 .purple { color: var(--accent); }
+
+  .hero p {
+    font-size: 18px; color: rgba(255,255,255,0.55);
+    max-width: 500px; line-height: 1.7; margin-bottom: 40px;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+
+  .hero-btns {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.5s ease both;
+    margin-bottom: 56px;
+  }
+  .btn-hero {
+    background: var(--brand); color: #fff; border: none;
+    padding: 15px 34px; border-radius: 8px; font-size: 16px;
+    font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 0 30px rgba(94,64,116,0.5);
+    transition: all 0.25s; position: relative; overflow: hidden;
+  }
+  .btn-hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(94,64,116,0.7); }
+  .btn-hero:hover::after { opacity: 1; }
+  .btn-outline-hero {
+    background: transparent; color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    padding: 15px 34px; border-radius: 8px; font-size: 16px;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.25s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-outline-hero:hover { border-color: var(--accent); color: var(--accent); }
+
+  .collab-strip {
+    display: flex; align-items: center; gap: 16px; justify-content: center;
+    animation: fadeUp 0.7s 0.6s ease both;
+  }
+  .avatar-row { display: flex; }
+  .av {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 2.5px solid var(--brand-darker);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: #fff;
+    margin-left: -10px; font-family: 'Syne', sans-serif;
+  }
+  .av:first-child { margin-left: 0; }
+  .collab-text { color: rgba(255,255,255,0.45); font-size: 14px; }
+  .collab-text strong { color: rgba(255,255,255,0.8); font-weight: 500; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---- EDITOR SECTION ---- */
+  .editor-section {
+    background: #13091f;
+    padding: 80px 40px;
+  }
+  .section-label {
+    text-align: center; font-size: 12px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .editor-section .section-title {
+    text-align: center; font-size: 34px; font-weight: 700;
+    color: #fff; margin-bottom: 48px; letter-spacing: -0.5px;
+  }
+
+  .editor-wrap {
+    max-width: 1000px; margin: 0 auto;
+    background: #0d0617; border-radius: 16px;
+    border: 1px solid rgba(201,168,240,0.15);
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 60px rgba(94,64,116,0.15);
+  }
+
+  /* window chrome */
+  .editor-chrome {
+    background: #1a0f2e; padding: 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid rgba(201,168,240,0.1);
+  }
+  .chrome-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .cd1 { background: #ff5f57; }
+  .cd2 { background: #ffbd2e; }
+  .cd3 { background: #28c840; }
+  .chrome-title { color: rgba(255,255,255,0.4); font-size: 13px; margin: 0 auto; }
+
+  .editor-toolbar {
+    background: #1e1230; padding: 8px 16px;
+    display: flex; align-items: center; gap: 4px;
+    border-bottom: 1px solid rgba(94,64,116,0.2);
+    flex-wrap: wrap;
+  }
+  .tb-group { display: flex; gap: 2px; }
+  .tb-sep { width: 1px; height: 24px; background: rgba(255,255,255,0.08); margin: 0 6px; }
+  .tb-btn {
+    width: 32px; height: 32px; border-radius: 6px; border: none;
+    background: transparent; color: rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px; transition: all 0.15s;
+  }
+  .tb-btn:hover, .tb-btn.active { background: var(--brand); color: #fff; }
+  .tb-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .online-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(76,222,144,0.1); border: 1px solid rgba(76,222,144,0.2);
+    border-radius: 20px; padding: 4px 12px;
+  }
+  .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #4cde90; animation: pulse 2s infinite; }
+  .online-pill span { color: rgba(255,255,255,0.6); font-size: 12px; }
+
+  .editor-body { display: flex; height: 340px; }
+  .preview-pane {
+    flex: 1; background: #060210;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; border-right: 1px solid rgba(94,64,116,0.15);
+    overflow: hidden;
+  }
+  .preview-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(94,64,116,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(94,64,116,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .preview-play {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: rgba(94,64,116,0.6);
+    border: 2px solid rgba(201,168,240,0.4);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; z-index: 1;
+    transition: all 0.2s;
+    box-shadow: 0 0 30px rgba(94,64,116,0.5);
+  }
+  .preview-play:hover { background: var(--brand); box-shadow: 0 0 40px rgba(94,64,116,0.8); }
+  .tri { width: 0; height: 0; border-top: 11px solid transparent; border-bottom: 11px solid transparent; border-left: 18px solid #fff; margin-left: 4px; }
+  .timecode {
+    position: absolute; bottom: 10px; right: 12px;
+    color: rgba(255,255,255,0.4); font-size: 12px; font-family: 'DM Mono', monospace; z-index: 1;
+  }
+  .collab-cursors {
+    position: absolute; top: 20px; left: 20px; z-index: 2; display: flex; flex-direction: column; gap: 6px;
+  }
+  .cursor-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: 4px; padding: 3px 8px; font-size: 11px; color: #fff; font-weight: 500;
+  }
+  .cursor-dot-sm { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+
+  .layers-pane {
+    width: 200px; background: #100820; padding: 14px 12px; overflow-y: auto;
+  }
+  .pane-title { color: rgba(255,255,255,0.35); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  .layer-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 8px; border-radius: 6px; cursor: pointer; margin-bottom: 3px;
+    transition: background 0.15s;
+  }
+  .layer-item:hover { background: rgba(94,64,116,0.2); }
+  .layer-item.active { background: rgba(94,64,116,0.35); }
+  .layer-color { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .layer-name { color: rgba(255,255,255,0.7); font-size: 12px; flex: 1; }
+  .layer-vis { color: rgba(255,255,255,0.25); font-size: 14px; }
+  .export-btn {
+    width: 100%; margin-top: 14px; padding: 9px;
+    background: var(--brand); border: none; border-radius: 6px;
+    color: #fff; font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .export-btn:hover { background: var(--brand-light); }
+
+  .timeline-area { border-top: 1px solid rgba(94,64,116,0.2); padding: 14px 16px; background: #0d0617; }
+  .time-ruler { display: flex; padding-left: 56px; margin-bottom: 8px; }
+  .t-mark { flex: 1; color: rgba(255,255,255,0.2); font-size: 10px; font-family: monospace; }
+  .track-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .track-name { width: 48px; color: rgba(255,255,255,0.3); font-size: 11px; text-align: right; flex-shrink: 0; }
+  .track-bg { flex: 1; height: 22px; background: rgba(255,255,255,0.03); border-radius: 4px; position: relative; overflow: hidden; }
+  .clip-block { position: absolute; height: 100%; border-radius: 3px; display: flex; align-items: center; padding-left: 6px; }
+  .clip-block span { font-size: 10px; color: rgba(255,255,255,0.65); white-space: nowrap; }
+  .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; opacity: 0.8; }
+
+  /* ---- FEATURES ---- */
+  .features { padding: 96px 40px; background: var(--white); }
+  .section-title-dark { font-size: 38px; font-weight: 700; color: var(--brand-dark); text-align: center; letter-spacing: -0.8px; margin-bottom: 10px; }
+  .section-sub { text-align: center; color: var(--text-muted); font-size: 16px; margin-bottom: 56px; }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+  .feat-card {
+    background: var(--brand-bg); border-radius: 14px;
+    padding: 28px; border: 1px solid rgba(94,64,116,0.1);
+    transition: all 0.25s; position: relative; overflow: hidden;
+  }
+  .feat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--brand), var(--brand-lighter));
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .feat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(94,64,116,0.12); border-color: rgba(94,64,116,0.25); }
+  .feat-card:hover::before { opacity: 1; }
+  .feat-icon {
+    width: 44px; height: 44px; background: var(--brand); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(94,64,116,0.3);
+  }
+  .feat-card h3 { font-size: 15px; font-weight: 600; color: var(--brand-dark); margin-bottom: 8px; letter-spacing: -0.2px; }
+  .feat-card p { color: var(--text-muted); font-size: 14px; line-height: 1.65; }
+
+  /* ---- TESTIMONIALS ---- */
+  .testimonials { padding: 80px 40px; background: var(--brand-bg); }
+  .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+  .testi-card {
+    background: #fff; border-radius: 14px; padding: 26px;
+    border: 1px solid rgba(94,64,116,0.1);
+    transition: box-shadow 0.2s;
+  }
+  .testi-card:hover { box-shadow: 0 8px 32px rgba(94,64,116,0.1); }
+  .stars { color: var(--brand); font-size: 14px; letter-spacing: 2px; margin-bottom: 12px; }
+  .testi-card p { color: var(--text-muted); font-size: 14px; line-height: 1.7; margin-bottom: 18px; font-style: italic; }
+  .testi-author { display: flex; align-items: center; gap: 10px; }
+  .testi-av {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--brand); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff; font-family: 'Syne', sans-serif;
+  }
+  .testi-info strong { display: block; font-size: 13px; font-weight: 600; color: var(--brand-dark); }
+  .testi-info span { font-size: 12px; color: var(--text-muted); }
+
+  /* ---- PRICING ---- */
+  .pricing { padding: 96px 40px; background: var(--white); }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
+  .price-card {
+    background: var(--brand-bg); border-radius: 16px; padding: 32px 28px;
+    border: 1px solid rgba(94,64,116,0.12); transition: all 0.25s;
+  }
+  .price-card:hover { box-shadow: 0 12px 40px rgba(94,64,116,0.1); }
+  .price-card.featured {
+    background: var(--brand-dark); border: 2px solid var(--brand);
+    box-shadow: 0 0 40px rgba(94,64,116,0.3);
+  }
+  .popular-tag {
+    display: inline-block; background: var(--brand); color: #fff;
+    font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 16px; letter-spacing: 0.05em;
+  }
+  .plan-name { font-size: 18px; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px; }
+  .price-card.featured .plan-name { color: #fff; }
+  .price-amount { font-size: 38px; font-weight: 800; color: var(--brand-dark); font-family: 'Syne', sans-serif; letter-spacing: -1px; }
+  .price-card.featured .price-amount { color: #fff; }
+  .price-period { font-size: 14px; color: var(--text-muted); font-weight: 400; }
+  .price-card.featured .price-period { color: rgba(255,255,255,0.5); }
+  .plan-desc { color: var(--text-muted); font-size: 13px; margin: 10px 0 20px; }
+  .price-card.featured .plan-desc { color: rgba(255,255,255,0.55); }
+  .plan-feats { list-style: none; margin-bottom: 24px; }
+  .plan-feats li { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; color: var(--text-muted); }
+  .price-card.featured .plan-feats li { color: rgba(255,255,255,0.7); }
+  .check-ic { width: 18px; height: 18px; border-radius: 50%; background: rgba(94,64,116,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .price-card.featured .check-ic { background: rgba(255,255,255,0.12); }
+  .ck { display: block; width: 5px; height: 8px; border-right: 2px solid var(--brand); border-bottom: 2px solid var(--brand); transform: rotate(40deg) translateY(-1px); }
+  .price-card.featured .ck { border-color: var(--accent); }
+  .btn-price {
+    width: 100%; padding: 12px; border-radius: 8px; font-size: 14px;
+    font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .btn-price-outline { background: transparent; border: 1.5px solid var(--brand); color: var(--brand); }
+  .btn-price-outline:hover { background: var(--brand); color: #fff; }
+  .btn-price-fill { background: var(--accent); border: none; color: var(--brand-dark); font-weight: 600; }
+  .btn-price-fill:hover { background: #fff; }
+
+  /* ---- FOOTER ---- */
+  footer {
+    background: var(--brand-darker);
+    padding: 64px 40px 32px;
+  }
+  .footer-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr;
+    gap: 48px; max-width: 1000px; margin: 0 auto 48px;
+  }
+  .footer-brand .logo-text { font-size: 22px; }
+  .footer-brand p { color: rgba(255,255,255,0.4); font-size: 13px; line-height: 1.7; margin-top: 14px; max-width: 240px; }
+  .footer-col h4 { color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; margin-bottom: 16px; letter-spacing: 0.03em; font-family: 'Syne', sans-serif; }
+  .footer-col a { display: block; color: rgba(255,255,255,0.4); font-size: 13px; text-decoration: none; margin-bottom: 10px; transition: color 0.2s; cursor: pointer; }
+  .footer-col a:hover { color: var(--accent); }
+  .contact-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .contact-ic {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .contact-row:hover .contact-ic { background: var(--brand); }
+  .contact-row a { color: rgba(255,255,255,0.55); font-size: 13px; text-decoration: none; margin: 0; transition: color 0.2s; }
+  .contact-row:hover a { color: var(--accent); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 24px; max-width: 1000px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-bottom p { color: rgba(255,255,255,0.25); font-size: 12px; }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { color: rgba(255,255,255,0.25); font-size: 12px; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: rgba(255,255,255,0.6); }
+
+  /* ---- SCROLL REVEAL ---- */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 20px 60px; }
+    .editor-section, .features, .testimonials, .pricing { padding: 60px 20px; }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    footer { padding: 48px 20px 24px; }
+    .editor-body { height: auto; flex-direction: column; }
+    .layers-pane { width: 100%; height: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <polygon points="4,2 14,8 4,14" fill="#fff"/>
+      </svg>
+    </div>
+    <span class="logo-text">FrameCollab</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn-ghost">Log in</button>
+    <button class="btn-nav">Get started free</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-orb orb1"></div>
+  <div class="hero-bg-orb orb2"></div>
+  <div class="hero-bg-orb orb3"></div>
+
+  <div class="hero-badge">
+    <div class="badge-dot"></div>
+    <span>Real-time collaboration — now in beta</span>
+  </div>
+
+  <h1>Edit Together.<br><span class="purple">Create Faster.</span></h1>
+  <p>Professional video editing meets real-time collaboration. Cut, trim, color, and publish — all in your browser, all at once.</p>
+
+  <div class="hero-btns">
+    <button class="btn-hero">Start editing free</button>
+    <button class="btn-outline-hero">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+        <polygon points="6,5 12,8 6,11" fill="currentColor"/>
+      </svg>
+      Watch demo
+    </button>
+  </div>
+
+  <div class="collab-strip">
+    <div class="avatar-row">
+      <div class="av" style="background:#5e4074;">RK</div>
+      <div class="av" style="background:#7a5494;">SM</div>
+      <div class="av" style="background:#9b6ab5;">NP</div>
+      <div class="av" style="background:#b880d0;">AJ</div>
+      <div class="av" style="background:#3e2a50;">+9</div>
+    </div>
+    <p class="collab-text">Trusted by <strong>12,000+</strong> creators and teams worldwide</p>
+  </div>
+</section>
+
+<!-- EDITOR -->
+<section class="editor-section">
+  <p class="section-label">Live editor preview</p>
+  <h2 class="section-title" style="color:#fff;">Your studio, in the browser</h2>
+
+  <div class="editor-wrap reveal">
+    <div class="editor-chrome">
+      <div class="chrome-dot cd1"></div>
+      <div class="chrome-dot cd2"></div>
+      <div class="chrome-dot cd3"></div>
+      <span class="chrome-title">FrameCollab — Project: Brand Reel 2026</span>
+    </div>
+    <div class="editor-toolbar">
+      <div class="tb-group">
+        <button class="tb-btn active" title="Play">▶</button>
+        <button class="tb-btn" title="Pause">⏸</button>
+      </div>
+      <div class="tb-sep"></div>
+      <div class="tb-group">
+        <button class="tb-btn" title="Cut">✂</button>
+        <button class="tb-btn" title="Text">T</button>
+        <button class="tb-btn" title="Music">♪</button>
+        <button class="tb-btn" title="Effects">★</button>
+        <button class="tb-btn" title="Color">🎨</button>
+      </div>
+      <div class="tb-sep"></div>
+      <div class="tb-group">
+        <button class="tb-btn" title="Undo">↩</button>
+        <button class="tb-btn" title="Redo">↪</button>
+      </div>
+      <div class="tb-right">
+        <div class="online-pill">
+          <div class="online-dot"></div>
+          <span>3 online</span>
+        </div>
+        <div class="avatar-row">
+          <div class="av" style="background:#7a5494;width:28px;height:28px;font-size:11px;border-color:#13091f;">SM</div>
+          <div class="av" style="background:#9b6ab5;width:28px;height:28px;font-size:11px;border-color:#13091f;">NP</div>
+          <div class="av" style="background:#b880d0;width:28px;height:28px;font-size:11px;border-color:#13091f;">AJ</div>
+        </div>
+      </div>
+    </div>
+    <div class="editor-body">
+      <div class="preview-pane">
+        <div class="preview-grid"></div>
+        <div class="collab-cursors">
+          <div class="cursor-tag" style="background:rgba(122,84,148,0.8);">
+            <div class="cursor-dot-sm"></div> SM editing
+          </div>
+          <div class="cursor-tag" style="background:rgba(155,106,181,0.8);">
+            <div class="cursor-dot-sm"></div> NP reviewing
+          </div>
+        </div>
+        <div class="preview-play">
+          <div class="tri"></div>
+        </div>
+        <div class="timecode">02:14 / 05:30</div>
+      </div>
+      <div class="layers-pane">
+        <div class="pane-title">Layers</div>
+        <div class="layer-item active">
+          <div class="layer-color" style="background:#9b6ab5;"></div>
+          <span class="layer-name">Main footage</span>
+          <span class="layer-vis">●</span>
+        </div>
+        <div class="layer-item">
+          <div class="layer-color" style="background:#4cde90;"></div>
+          <span class="layer-name">Intro title</span>
+          <span class="layer-vis">●</span>
+        </div>
+        <div class="layer-item">
+          <div class="layer-color" style="background:#5b9ef5;"></div>
+          <span class="layer-name">BG music</span>
+          <span class="layer-vis">●</span>
+        </div>
+        <div class="layer-item">
+          <div class="layer-color" style="background:#f5a623;"></div>
+          <span class="layer-name">SFX layer</span>
+          <span class="layer-vis">●</span>
+        </div>
+        <div class="layer-item">
+          <div class="layer-color" style="background:#e84393;"></div>
+          <span class="layer-name">Lower thirds</span>
+          <span class="layer-vis">○</span>
+        </div>
+        <button class="export-btn">⬆ Export 4K</button>
+      </div>
+    </div>
+    <div class="timeline-area">
+      <div class="time-ruler">
+        <span class="t-mark">0:00</span>
+        <span class="t-mark">1:00</span>
+        <span class="t-mark">2:00</span>
+        <span class="t-mark">3:00</span>
+        <span class="t-mark">4:00</span>
+        <span class="t-mark">5:00</span>
+      </div>
+      <div class="track-row">
+        <span class="track-name">Video</span>
+        <div class="track-bg">
+          <div class="clip-block" style="background:rgba(94,64,116,0.7);left:0;width:44%;"><span>Clip 01.mp4</span></div>
+          <div class="clip-block" style="background:rgba(94,64,116,0.5);left:46%;width:30%;"><span>Clip 02.mp4</span></div>
+          <div class="clip-block" style="background:rgba(94,64,116,0.4);left:78%;width:20%;"><span>Clip 03</span></div>
+          <div class="playhead" style="left:40%;"></div>
+        </div>
+      </div>
+      <div class="track-row">
+        <span class="track-name">Audio</span>
+        <div class="track-bg">
+          <div class="clip-block" style="background:rgba(76,222,144,0.3);left:0;width:90%;"><span>Background music</span></div>
+          <div class="playhead" style="left:40%;"></div>
+        </div>
+      </div>
+      <div class="track-row">
+        <span class="track-name">Text</span>
+        <div class="track-bg">
+          <div class="clip-block" style="background:rgba(245,166,35,0.35);left:5%;width:18%;"><span>Intro title</span></div>
+          <div class="clip-block" style="background:rgba(245,166,35,0.25);left:55%;width:14%;"><span>Lower third</span></div>
+          <div class="playhead" style="left:40%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <p class="section-label" style="color:var(--brand);">Why FrameCollab</p>
+  <h2 class="section-title-dark">Everything your team needs</h2>
+  <p class="section-sub">Professional tools built for real-time collaboration</p>
+  <div class="features-grid">
+    <div class="feat-card reveal reveal-delay-1">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="9" cy="12" r="3"/><circle cx="15" cy="12" r="3"/><path d="M12 12h0"/></svg>
+      </div>
+      <h3>Real-time collaboration</h3>
+      <p>Multiple editors on the same timeline with live cursors, comments, and instant sync.</p>
+    </div>
+    <div class="feat-card reveal reveal-delay-2">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/></svg>
+      </div>
+      <h3>Multi-track timeline</h3>
+      <p>Drag-and-drop clips, audio, text, and effects on a professional-grade editor timeline.</p>
+    </div>
+    <div class="feat-card reveal reveal-delay-3">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <h3>AI-powered tools</h3>
+      <p>Auto-subtitles, background removal, noise reduction, and smart scene detection.</p>
+    </div>
+    <div class="feat-card reveal reveal-delay-1">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="5"/><path d="M3 12c0 2.76 4.03 5 9 5s9-2.24 9-5M3 7v10M21 7v10"/></svg>
+      </div>
+      <h3>Cloud storage</h3>
+      <p>All your projects and assets live in the cloud — secure, backed up, accessible anywhere.</p>
+    </div>
+    <div class="feat-card reveal reveal-delay-2">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <h3>Version history</h3>
+      <p>Browse, compare, and restore any previous version of your project — never lose work again.</p>
+    </div>
+    <div class="feat-card reveal reveal-delay-3">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      </div>
+      <h3>Export in 4K</h3>
+      <p>Publish to YouTube, Instagram, TikTok, or download in up to 4K resolution — one click.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <p class="section-label" style="color:var(--brand);">What people say</p>
+  <h2 class="section-title-dark">Loved by creators</h2>
+  <p class="section-sub">From solo YouTubers to full production teams</p>
+  <div class="testi-grid">
+    <div class="testi-card reveal reveal-delay-1">
+      <div class="stars">★★★★★</div>
+      <p>"FrameCollab completely changed how our agency works. We can now review and edit footage in real-time with clients — no more endless back-and-forth emails."</p>
+      <div class="testi-author">
+        <div class="testi-av">PK</div>
+        <div class="testi-info">
+          <strong>Priya Kapoor</strong>
+          <span>Creative Director, StudioInk</span>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal reveal-delay-2">
+      <div class="stars">★★★★★</div>
+      <p>"The AI subtitle tool alone saves me 2 hours per video. The collab features are top-notch — my editor and I work seamlessly even across time zones."</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:#7a5494;">AR</div>
+        <div class="testi-info">
+          <strong>Aditya Rao</strong>
+          <span>YouTube Creator, 800K subscribers</span>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal reveal-delay-3">
+      <div class="stars">★★★★★</div>
+      <p>"Switched from Premiere Pro and never looked back. Browser-based, instant collab, clean UI — this is the future of video editing for teams."</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:#9b6ab5;">MN</div>
+        <div class="testi-info">
+          <strong>Meera Nair</strong>
+          <span>Freelance Filmmaker</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <p class="section-label" style="color:var(--brand);">Pricing</p>
+  <h2 class="section-title-dark">Simple, honest pricing</h2>
+  <p class="section-sub">Start free. Upgrade when you're ready.</p>
+  <div class="pricing-grid">
+    <div class="price-card reveal reveal-delay-1">
+      <div class="plan-name">Free</div>
+      <div><span class="price-amount">₹0</span> <span class="price-period">/ month</span></div>
+      <p class="plan-desc">Perfect for solo creators just getting started.</p>
+      <ul class="plan-feats">
+        <li><div class="check-ic"><span class="ck"></span></div>3 active projects</li>
+        <li><div class="check-ic"><span class="ck"></span></div>720p export</li>
+        <li><div class="check-ic"><span class="ck"></span></div>5 GB storage</li>
+        <li><div class="check-ic"><span class="ck"></span></div>1 collaborator</li>
+      </ul>
+      <button class="btn-price btn-price-outline">Get started free</button>
+    </div>
+    <div class="price-card featured reveal reveal-delay-2">
+      <div class="popular-tag">Most popular</div>
+      <div class="plan-name">Pro</div>
+      <div><span class="price-amount">₹799</span> <span class="price-period">/ month</span></div>
+      <p class="plan-desc">For serious creators and small teams.</p>
+      <ul class="plan-feats">
+        <li><div class="check-ic"><span class="ck"></span></div>Unlimited projects</li>
+        <li><div class="check-ic"><span class="ck"></span></div>4K export</li>
+        <li><div class="check-ic"><span class="ck"></span></div>100 GB storage</li>
+        <li><div class="check-ic"><span class="ck"></span></div>5 collaborators</li>
+        <li><div class="check-ic"><span class="ck"></span></div>AI tools included</li>
+      </ul>
+      <button class="btn-price btn-price-fill">Start Pro trial</button>
+    </div>
+    <div class="price-card reveal reveal-delay-3">
+      <div class="plan-name">Team</div>
+      <div><span class="price-amount">₹2,499</span> <span class="price-period">/ month</span></div>
+      <p class="plan-desc">For agencies and large production teams.</p>
+      <ul class="plan-feats">
+        <li><div class="check-ic"><span class="ck"></span></div>Everything in Pro</li>
+        <li><div class="check-ic"><span class="ck"></span></div>Unlimited collaborators</li>
+        <li><div class="check-ic"><span class="ck"></span></div>1 TB storage</li>
+        <li><div class="check-ic"><span class="ck"></span></div>Priority support</li>
+        <li><div class="check-ic"><span class="ck"></span></div>Admin controls</li>
+      </ul>
+      <button class="btn-price btn-price-outline">Contact sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <polygon points="4,2 14,8 4,14" fill="#fff"/>
+          </svg>
+        </div>
+        <span class="logo-text" style="color:#fff;">FrameCollab</span>
+      </div>
+      <p>Real-time collaborative video editing for modern teams and creators. Edit together, ship faster.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#">Features</a>
+      <a href="#">Pricing</a>
+      <a href="#">Templates</a>
+      <a href="#">Changelog</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+      <a href="#">Careers</a>
+      <a href="#">Privacy</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact us</h4>
+      <div class="contact-row">
+        <div class="contact-ic">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <a href="mailto:noneasap@gmail.com">noneasap@gmail.com</a>
+      </div>
+      <div class="contact-row">
+        <div class="contact-ic">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><path d="M21 15.46l-5.27-.61-2.52 2.52a15.045 15.045 0 0 1-6.59-6.59l2.53-2.53L8.54 3H3.03C2.45 13.18 10.82 21.55 21 20.97l.0-5.51z"/></svg>
+        </div>
+        <a href="https://wa.me/919134702991" target="_blank">+91 9134702991 (WhatsApp)</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 FrameCollab. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Terms</a>
+      <a href="#">Privacy</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  let playing = false;
+  document.querySelector('.preview-play').addEventListener('click', function() {
+    playing = !playing;
+    this.querySelector('.tri').style.display = playing ? 'none' : 'block';
+    this.innerHTML = playing
+      ? '<div style="display:flex;gap:4px;align-items:center;"><div style="width:4px;height:18px;background:#fff;border-radius:2px;"></div><div style="width:4px;height:18px;background:#fff;border-radius:2px;"></div></div>'
+      : '<div class="tri"></div>';
+  });
+
+  document.querySelectorAll('.layer-item').forEach(item => {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.layer-item').forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
